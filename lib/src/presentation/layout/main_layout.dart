@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../home/home_screen.dart';
 import '../home/calendar_page.dart';
 import '../home/bible_page.dart';
+import '../home/donate_page.dart';
+import '../notes/notes_page.dart';
 import '../home/widgets/profile_drawer.dart';
 import '../home/widgets/blurred_background.dart';
 
@@ -25,10 +27,10 @@ class _MainLayoutState extends State<MainLayout> {
   // Lista de pagini
   final List<Widget> _pages = const [
     HomeScreen(),
-    BiblePage(),  // Biblia
-    CalendarPage(),  // Calendar
-    HomeScreen(),  // Placeholder Notițe
-    HomeScreen(),  // Placeholder Donează
+    BiblePage(),
+    CalendarPage(),
+    NotesPage(),
+    DonatePage(),
   ];
 
   @override
