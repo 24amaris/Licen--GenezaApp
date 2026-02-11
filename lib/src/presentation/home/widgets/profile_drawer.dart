@@ -233,6 +233,19 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
                               );
                             },
                           ),
+                          const SizedBox(height: 12),
+                          _buildMenuItem(
+                            icon: Icons.phone_outlined,
+                            title: 'Contact',
+                            subtitle: 'Contactează-ne',
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const ContactPage()),
+                              );
+                            },
+                          ),
                           const SizedBox(height: 32),
                           // Logout
                           SizedBox(

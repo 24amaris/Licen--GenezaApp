@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/sermon_item.dart';
 
@@ -7,8 +8,13 @@ class SermonService {
   factory SermonService() => _instance;
   SermonService._internal();
 
-  static const String _notesKey = 'sermon_notes';
-  static const String _watchedKey = 'sermon_watched';
+  String get _userSuffix {
+    final user = FirebaseAuth.instance.currentUser;
+    return user != null ? user.uid : 'guest';
+  }
+
+  String get _notesKey => 'sermon_notes_$_userSuffix';
+  String get _watchedKey => 'sermon_watched_$_userSuffix';
 
   /// Returnează toate seriile de predici
   List<SermonSeries> getAllSeries() {
