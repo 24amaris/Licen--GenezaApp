@@ -32,7 +32,7 @@ class EventCard extends StatelessWidget {
             // ============ IMAGINE FULL (toată cardul) ============
             Positioned.fill(
               child: event.imageUrl != null
-                  ? Image.asset(
+                  ? Image.network(
                       event.imageUrl!,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
