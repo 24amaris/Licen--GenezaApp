@@ -16,7 +16,8 @@ import '../home/donate_page.dart';
 import 'sermon_series_page.dart';
 import 'sermon_list_page.dart';
 import 'sermon_detail_page.dart';
-
+import 'involvement_page.dart';
+import 'home_groups_page.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -211,30 +212,56 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFeatureButtons(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: _buildFeatureButton(
-              icon: Icons.menu_book,
-              label: 'Versetul zilei',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VersePage())),
-            ),
+          // Rândul 1: 3 butoane
+          Row(
+            children: [
+              Expanded(
+                child: _buildFeatureButton(
+                  icon: Icons.menu_book,
+                  label: 'Versetul zilei',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VersePage())),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildFeatureButton(
+                  icon: Icons.people,
+                  label: 'Rugăciune',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrayerPage())),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildFeatureButton(
+                  icon: Icons.volunteer_activism,
+                  label: 'Donează',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DonatePage(isStandalone: true))),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _buildFeatureButton(
-              icon: Icons.people,
-              label: 'Rugăciune',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrayerPage())),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _buildFeatureButton(
-              icon: Icons.volunteer_activism,
-              label: 'Donează',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DonatePage(isStandalone: true))),
-            ),
+          const SizedBox(height: 12),
+          // Rândul 2: 2 butoane
+          Row(
+            children: [
+              Expanded(
+                child: _buildFeatureButton(
+                  icon: Icons.handshake,
+                  label: 'Vreau să mă implic',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InvolvementPage())),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildFeatureButton(
+                  icon: Icons.home,
+                  label: 'Grupele de casă',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HomeGroupsPage())),
+                ),
+              ),
+            ],
           ),
         ],
       ),

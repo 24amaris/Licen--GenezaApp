@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'src/theme/geneza_theme.dart';
 import 'src/presentation/auth/login_screen.dart';
+import 'src/presentation/layout/main_layout.dart';
+import 'src/services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +13,9 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Inițializează notificările
+  await NotificationService().initialize();
   
   runApp(const GenezaApp());
 }
@@ -22,9 +28,19 @@ class GenezaApp extends StatelessWidget {
     return MaterialApp(
       title: 'Geneza App',
       debugShowCheckedModeBanner: false,
-      theme: GenezaTheme.theme,  // ✅ CORECT - folosim "theme" nu "darkTheme"
-      // Ecranul de start
-     home: const LoginScreen(),
+      theme: GenezaTheme.theme,
+      // Verifică starea autentificării
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // Dacă sunt date despre utilizator
+          if (snapshot.hasData && snapshot.data != null) {
+            return const MainLayout();
+          }
+          // Altfel, arată login
+          return const LoginScreen();
+        },
+      ),
     );
   }
 }

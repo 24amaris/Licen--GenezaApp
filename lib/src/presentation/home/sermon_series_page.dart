@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../layout/main_layout.dart';
 import '../../models/sermon_item.dart';
 import '../../services/sermon_service.dart';
 import 'sermon_list_page.dart';
@@ -45,8 +46,12 @@ class SermonSeriesPage extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    // reduce vertical padding so the row sits closer to the top edge
+    // (the screenshots showed a large empty gap above the title when the
+    // main layout's global app bar was still rendered).  Horizontal padding
+    // is kept for spacing from the sides.
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           Container(
@@ -56,7 +61,16 @@ class SermonSeriesPage extends StatelessWidget {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: lightGrey),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                // behave like a normal pop when we have a previous route
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  // otherwise we are inside the bottom-nav layout and there
+                  // is nothing to pop; ask the layout to switch to home.
+                  MainLayout.of(context)?.setIndex(0);
+                }
+              },
             ),
           ),
           const SizedBox(width: 12),

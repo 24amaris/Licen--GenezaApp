@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../home/home_screen.dart';
 import '../home/calendar_page.dart';
-import '../home/bible_page.dart';
 import '../home/donate_page.dart';
+import '../home/sermon_series_page.dart';
 import '../notes/notes_page.dart';
 import '../home/widgets/profile_drawer.dart';
 import '../home/widgets/blurred_background.dart';
 
 class MainLayout extends StatefulWidget {
+  // expose a helper so that children can notify the layout to switch
+  // tabs (e.g. when a page inside the body wants to "go back" to home)
   const MainLayout({super.key});
+
+  /// Return the state object for the nearest ancestor [MainLayout].
+  ///
+  /// We expose this public static method because most of the page widgets
+  /// live in different files and would otherwise have no way to access the
+  /// private `_MainLayoutState` class.  Consumers can call
+  /// `MainLayout.of(context)?.setIndex(...)` to change the current tab.
+  static _MainLayoutState? of(BuildContext context) {
+    return context.findAncestorStateOfType<_MainLayoutState>();
+  }
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -24,36 +36,35 @@ class _MainLayoutState extends State<MainLayout> {
   static const Color navy = Color(0xFF123458);
   static const Color deepBlack = Color(0xFF030303);
 
-  // Lista de pagini
-  final List<Widget> _pages = const [
-    HomeScreen(),
-    BiblePage(),
-    CalendarPage(),
-    NotesPage(),
-    DonatePage(),
-  ];
+  // we no longer keep a constant list: some pages need callbacks to
+  // communicate with the layout (e.g. the sermon series page uses
+  // `MainLayout.of(context)?.setIndex(0)` when its back button is
+  // pressed).  Build the current page dynamically instead.
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      
+
       // Drawer (profil)
       endDrawer: const ProfileDrawer(),
-      
+
       // Body cu fundal blurat
       body: BlurredBackground(
         blurAmount: 15.0,
         child: Column(
           children: [
-            // Header transparent
-            _buildAppBar(),
-            
-            // Pagina curentă
+            // Only hide the global header on the "Predici" tab (index 1),
+            // which has its own header with back button. All other tabs
+            // should show the logo/appbar.
+            if (_currentIndex != 1) _buildAppBar(),
+
+            // Pagina curentă – build on demand so we can pass callbacks if
+            // necessary.
             Expanded(
-              child: _pages[_currentIndex],
+              child: _buildCurrentPage(),
             ),
-            
+
             // Footer transparent
             _buildBottomNav(),
           ],
@@ -127,6 +138,7 @@ class _MainLayoutState extends State<MainLayout> {
               ),
             ),
           ),
+
           child: SafeArea(
             child: Container(
               height: 70,
@@ -141,9 +153,9 @@ class _MainLayoutState extends State<MainLayout> {
                     index: 0,
                   ),
                   _buildNavItem(
-                    icon: Icons.library_books_outlined,
-                    activeIcon: Icons.my_library_books,
-                    label: 'Biblia',
+                    icon: Icons.mic_none_outlined,
+                    activeIcon: Icons.mic,
+                    label: 'Predici',
                     index: 1,
                   ),
                   _buildNavItem(
@@ -171,6 +183,42 @@ class _MainLayoutState extends State<MainLayout> {
         ),
       ],
     );
+  }
+
+  /// Programmatically change the current bottom-navigation index.
+  ///
+  /// This can be used by any descendant to make the layout behave as
+  /// though the user tapped a tab.  The public helper `MainLayout.of`
+  /// exposes access to this method.
+  void setIndex(int newIndex) {
+    if (newIndex != _currentIndex) {
+      setState(() {
+        _currentIndex = newIndex;
+      });
+    }
+  }
+
+  /// Chooses the widget for the current tab index.  This allows us to
+  /// inject callbacks into pages that need to communicate with the
+  /// surrounding layout.
+  Widget _buildCurrentPage() {
+    switch (_currentIndex) {
+      case 0:
+        return const HomeScreen();
+      case 1:
+        // the series page has a back arrow that should jump to home when
+        // the layout can't pop; there is no route coverage for this when
+        // used as a bottom-nav tab.
+        return const SermonSeriesPage();
+      case 2:
+        return const CalendarPage();
+      case 3:
+        return const NotesPage();
+      case 4:
+        return const DonatePage();
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   Widget _buildNavItem({

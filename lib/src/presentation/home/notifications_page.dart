@@ -220,7 +220,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: navy,
+            activeThumbColor: navy,
             activeTrackColor: lightGrey,
           ),
         ],

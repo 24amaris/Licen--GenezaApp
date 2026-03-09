@@ -28,7 +28,7 @@ class VersePage extends StatelessWidget {
             children: [
               // Header
               _buildHeader(context),
-              
+
               // Content
               Expanded(
                 child: SingleChildScrollView(
@@ -36,7 +36,7 @@ class VersePage extends StatelessWidget {
                   child: Column(
                     children: [
                       const SizedBox(height: 0),
-                      
+
                       // Titlu
                       Text(
                         'Versetul zilei',
@@ -46,9 +46,9 @@ class VersePage extends StatelessWidget {
                           color: lightGrey,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 60),
-                      
+
                       // Card verset
                       Container(
                         padding: const EdgeInsets.all(32),
@@ -67,9 +67,9 @@ class VersePage extends StatelessWidget {
                               size: 48,
                               color: lightGrey.withOpacity(0.8),
                             ),
-                            
+
                             const SizedBox(height: 24),
-                            
+
                             Text(
                               verse,
                               style: GoogleFonts.inter(
@@ -80,9 +80,9 @@ class VersePage extends StatelessWidget {
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            
+
                             const SizedBox(height: 24),
-                            
+
                             Text(
                               reference,
                               style: GoogleFonts.inter(
@@ -94,9 +94,9 @@ class VersePage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       // Butoane
                       Row(
                         children: [
@@ -127,9 +127,9 @@ class VersePage extends StatelessWidget {
                               ),
                             ),
                           ),
-                          
+
                           const SizedBox(width: 16),
-                          
+
                           // Buton Download
                           Expanded(
                             child: OutlinedButton.icon(

@@ -90,8 +90,10 @@ class _SermonListPageState extends State<SermonListPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    // same padding tweak as in series page – keep horizontal spacing but
+    // pull the row a little closer to the top edge.
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           Container(

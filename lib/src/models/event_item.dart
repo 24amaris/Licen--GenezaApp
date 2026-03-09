@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 /// Model simplificat pentru evenimente
 class EventItem {

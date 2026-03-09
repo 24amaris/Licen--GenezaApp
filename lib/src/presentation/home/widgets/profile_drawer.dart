@@ -4,10 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import '../../auth/login_screen.dart';
+import '../../auth/user_profile_page.dart';
 import '../contact_page.dart';
-import '../profile_page.dart';
 import '../notifications_page.dart';
 import '../family_page.dart';
+import '../../../services/auth_service.dart';
+import '../../../models/user_model.dart';
 
 class ProfileDrawer extends StatefulWidget {
   const ProfileDrawer({super.key});
@@ -31,23 +33,47 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
     _loadProfileImage();
   }
 
+  String get _userPrefix {
+    final user = FirebaseAuth.instance.currentUser;
+    return user != null ? user.uid : 'guest';
+  }
+
   // ✅ ÎNCARCĂ POZA DE PROFIL
   Future<void> _loadProfileImage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _profileImagePath = prefs.getString('profile_imagePath');
+      _profileImagePath = prefs.getString('profile_imagePath_$_userPrefix');
     });
   }
 
   // ✅ REFRESH CÂND TE ÎNTORCI DIN PROFILE PAGE
   void _openProfilePage() async {
+    // Capturăm navigatorul ÎNAINTE de pop, deoarece după pop widget-ul e disposed
+    final navigator = Navigator.of(context);
     Navigator.of(context).pop();
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const ProfilePage()),
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Fetch user data from Firestore
+    final authService = AuthService();
+    AppUser? appUser = await authService.getUserData(user.uid);
+
+    // Dacă nu există document în Firestore, construim un AppUser din datele Auth
+    appUser ??= AppUser(
+      id: user.uid,
+      email: user.email ?? '',
+      displayName: user.displayName ?? user.email?.split('@').first ?? 'Utilizator',
+      createdAt: user.metadata.creationTime ?? DateTime.now(),
     );
-    // După ce revii, reîncarcă poza
-    _loadProfileImage();
+
+    await navigator.push(
+      MaterialPageRoute(
+        builder: (context) => UserProfilePage(user: appUser!),
+      ),
+    );
+    // După ce revii, reîncarcă poza dacă widget-ul mai există
+    if (mounted) _loadProfileImage();
   }
 
   Future<bool> _isGuest() async {
