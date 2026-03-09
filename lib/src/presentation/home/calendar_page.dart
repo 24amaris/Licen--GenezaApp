@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'dart:async';
 import '../../models/event_item.dart';
 import '../../services/event_service.dart';
 import 'widgets/event_card.dart';
@@ -20,9 +21,12 @@ class _CalendarPageState extends State<CalendarPage> {
   static const Color navy = Color(0xFF123458);
 
   final EventService _eventService = EventService();
+  StreamSubscription? _eventsSubscription;
   List<EventItem> _allEvents = [];
   List<EventItem> _filteredEvents = [];
-  
+  bool _isLoading = true;
+  bool _hasError = false;
+
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
@@ -32,11 +36,41 @@ class _CalendarPageState extends State<CalendarPage> {
     _loadEvents();
   }
 
+  @override
+  void dispose() {
+    _eventsSubscription?.cancel();
+    super.dispose();
+  }
+
   void _loadEvents() {
-    setState(() {
-      _allEvents = _eventService.getImportantEvents();
-      _filteredEvents = _allEvents;
-    });
+    _eventsSubscription = _eventService.getEventsStream().listen(
+      (events) {
+        if (mounted) {
+          setState(() {
+            _allEvents = events;
+            _filteredEvents = _selectedDay != null
+                ? _filterForDay(_selectedDay!, events)
+                : events;
+            _isLoading = false;
+            _hasError = false;
+          });
+        }
+      },
+      onError: (_) {
+        if (mounted) setState(() { _isLoading = false; _hasError = true; });
+      },
+    );
+  }
+
+  List<EventItem> _filterForDay(DateTime day, List<EventItem> events) {
+    final filtered = events.where((event) {
+      final eventDate = _parseEventDate(event.date);
+      return eventDate != null &&
+          eventDate.year == day.year &&
+          eventDate.month == day.month &&
+          eventDate.day == day.day;
+    }).toList();
+    return filtered.isEmpty ? events : filtered;
   }
 
   // Verifică dacă o zi are evenimente
@@ -82,25 +116,25 @@ class _CalendarPageState extends State<CalendarPage> {
     setState(() {
       _selectedDay = selectedDay;
       _focusedDay = focusedDay;
-      
-      // Filtrează evenimente pentru ziua selectată
-      _filteredEvents = _allEvents.where((event) {
-        final eventDate = _parseEventDate(event.date);
-        return eventDate != null &&
-            eventDate.year == selectedDay.year &&
-            eventDate.month == selectedDay.month &&
-            eventDate.day == selectedDay.day;
-      }).toList();
-      
-      // Dacă nu sunt evenimente în ziua selectată, arată toate
-      if (_filteredEvents.isEmpty) {
-        _filteredEvents = _allEvents;
-      }
+      _filteredEvents = _filterForDay(selectedDay, _allEvents);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator(color: navy));
+    }
+
+    if (_hasError) {
+      return Center(
+        child: Text(
+          'Eroare la încărcarea evenimentelor',
+          style: GoogleFonts.inter(fontSize: 16, color: beige),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       child: Column(
         children: [

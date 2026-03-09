@@ -39,7 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentLatestSermonPage = 0;
   Timer? _timer;
   Timer? _latestSermonTimer;
+  StreamSubscription? _eventsSubscription;
   List<EventItem> _events = [];
+  bool _eventsLoading = true;
   List<SermonSeries> _sermonSeries = [];
   List<SermonItem> _latestSermons = [];
 
@@ -55,15 +57,26 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _timer?.cancel();
     _latestSermonTimer?.cancel();
+    _eventsSubscription?.cancel();
     _pageController.dispose();
     _latestSermonsController.dispose();
     super.dispose();
   }
 
   void _loadEvents() {
-    setState(() {
-      _events = _eventService.getImportantEvents();
-    });
+    _eventsSubscription = _eventService.getEventsStream().listen(
+      (events) {
+        if (mounted) {
+          setState(() {
+            _events = events;
+            _eventsLoading = false;
+          });
+        }
+      },
+      onError: (_) {
+        if (mounted) setState(() => _eventsLoading = false);
+      },
+    );
   }
 
   void _loadSermonData() {
@@ -116,12 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_events.isEmpty) {
-      return Container(
-        color: Colors.transparent,
-        child: const Center(
-          child: CircularProgressIndicator(color: navy),
-        ),
+    if (_eventsLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: navy),
       );
     }
 
@@ -131,32 +141,34 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 30),
 
           // Carusel de evenimente
-          SizedBox(
-            height: 200,
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) => setState(() => _currentPage = index),
-              itemCount: _events.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: EventCard(
-                    event: _events[index],
-                    onDetailsPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EventDetailPage(event: _events[index]),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+          if (_events.isNotEmpty) ...[
+            SizedBox(
+              height: 200,
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                itemCount: _events.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: EventCard(
+                      event: _events[index],
+                      onDetailsPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EventDetailPage(event: _events[index]),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          _buildDots(_currentPage, _events.length),
+            const SizedBox(height: 10),
+            _buildDots(_currentPage, _events.length),
+          ],
 
           const SizedBox(height: 40),
 

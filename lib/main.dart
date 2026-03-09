@@ -33,7 +33,14 @@ class GenezaApp extends StatelessWidget {
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          // Dacă sunt date despre utilizator
+          // Așteptăm răspunsul Firebase
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              backgroundColor: Colors.black,
+              body: Center(child: CircularProgressIndicator(color: Color(0xFF123458))),
+            );
+          }
+          // Utilizator autentificat
           if (snapshot.hasData && snapshot.data != null) {
             return const MainLayout();
           }
