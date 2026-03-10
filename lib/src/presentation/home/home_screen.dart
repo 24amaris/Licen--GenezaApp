@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:async';
 import '../../models/event_item.dart';
 import '../../models/sermon_item.dart';
@@ -71,6 +72,15 @@ class _HomeScreenState extends State<HomeScreen> {
             _events = events;
             _eventsLoading = false;
           });
+          // Pre-încarcă toate imaginile evenimentelor în cache
+          for (final event in events) {
+            if (event.imageUrl != null) {
+              precacheImage(
+                CachedNetworkImageProvider(event.imageUrl!),
+                context,
+              );
+            }
+          }
         }
       },
       onError: (_) {

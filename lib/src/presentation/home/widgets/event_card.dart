@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../models/event_item.dart';  // ✅ CORECT - 3 puncte (home/widgets/)
 
 class EventCard extends StatelessWidget {
@@ -32,12 +33,16 @@ class EventCard extends StatelessWidget {
             // ============ IMAGINE FULL (toată cardul) ============
             Positioned.fill(
               child: event.imageUrl != null
-                  ? Image.network(
-                      event.imageUrl!,
+                  ? CachedNetworkImage(
+                      imageUrl: event.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildImagePlaceholder();
-                      },
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF123458),
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => _buildImagePlaceholder(),
                     )
                   : _buildImagePlaceholder(),
             ),
@@ -61,37 +66,29 @@ class EventCard extends StatelessWidget {
               ),
             ),
 
-            // ============ CONȚINUT (doar buton) ============
+            // ============ BUTON MIC – stânga jos ============
             Positioned(
-              bottom: 24,
-              left: 24,
-              right: 24,
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: onDetailsPressed,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF123458),  // ✅ Navy
-                    foregroundColor: const Color(0xFFF1EFEC),  // Light Grey
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+              bottom: 16,
+              left: 16,
+              child: ElevatedButton.icon(
+                onPressed: onDetailsPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.25),
+                  foregroundColor: const Color(0xFFF1EFEC),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Vezi Detalii',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward, size: 20),
-                    ],
+                ),
+                icon: const Icon(Icons.arrow_forward, size: 14),
+                label: Text(
+                  'Vezi detalii',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

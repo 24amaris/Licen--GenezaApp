@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/event_item.dart';
 import 'widgets/blurred_background.dart';
 
@@ -194,10 +195,10 @@ class EventDetailPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF123458).withOpacity(0.1),
+                                color: const Color(0xFF123458).withValues(alpha:0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: const Color(0xFF123458).withOpacity(0.3),
+                                  color: const Color(0xFF123458).withValues(alpha:0.3),
                                 ),
                               ),
                               child: Row(
@@ -243,7 +244,7 @@ class EventDetailPage extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF123458).withOpacity(0.2),
+              color: const Color(0xFF123458).withValues(alpha:0.2),
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -279,7 +280,7 @@ class EventDetailPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha:0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -288,12 +289,16 @@ class EventDetailPage extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: event.imageUrl != null
-            ? Image.asset(
-                event.imageUrl!,
+            ? CachedNetworkImage(
+                imageUrl: event.imageUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildImagePlaceholder();
-                },
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF123458),
+                    strokeWidth: 2,
+                  ),
+                ),
+                errorWidget: (context, url, error) => _buildImagePlaceholder(),
               )
             : _buildImagePlaceholder(),
       ),
@@ -308,7 +313,7 @@ class EventDetailPage extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             const Color(0xFF123458),
-            const Color(0xFF123458).withOpacity(0.7),
+            const Color(0xFF123458).withValues(alpha:0.7),
           ],
         ),
       ),
@@ -330,10 +335,10 @@ class EventDetailPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF123458).withOpacity(0.2),
+        color: const Color(0xFF123458).withValues(alpha:0.2),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF123458).withOpacity(0.3),
+          color: const Color(0xFF123458).withValues(alpha:0.3),
           width: 1,
         ),
       ),
